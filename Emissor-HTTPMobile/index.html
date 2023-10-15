@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP8266</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            width: 100%;
+            background-color: white;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            font-family: 'Press Start 2P', cursive;
+        }
+        .controle{
+            width: 100%;
+            height: 100vh;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .painel{
+            width: 95%;
+            height: 95%;
+            background-color: rgb(22, 22, 22);
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            align-items: center;
+            justify-content: space-around;
+        }
+        .motor{
+            height: 100%;
+            /*border-color: white;
+            border-radius: 5px;
+            border-style: solid;*/
+            display: flex;
+            flex-direction: column;
+        }
+        .motor-box-button{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+        .motor-button{
+            font-family: 'Press Start 2P', cursive;
+        }
+        #Frente{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #Traz{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #Traz::before{
+            transform: rotate(180deg);
+        }
+        /* Estilize o botão triangular */
+        .triangular-button {
+            padding: 0; /* Remova o preenchimento para não afetar as dimensões */
+            font-size: 16px;
+            cursor: pointer;
+            width: 120px; /* O botão terá altura zero para formar o triângulo */
+            height: 120px; /* O botão terá altura zero para formar o triângulo */
+            border-radius: 20px;
+            border: 6px white solid;
+            background-color: rgb(55, 55, 55);
+        }
+
+        /* Crie o triângulo usando o pseudo-elemento ::before */
+        .triangular-button::before {
+            content: "";
+            display: block;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 40px 80px 40px; /* 100px de altura do triângulo e 50px de largura na base */
+            border-color: transparent transparent rgb(31, 31, 31) transparent;
+        }
+        .menu{
+            height: 100%;
+            gap: 5%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .menu-top{
+            width: 100%;
+            height: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .menu-input{
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.329);
+            border-style: none;
+            border-radius: 5px;
+        }
+        .menu-bot{
+            width: 100%;
+            height: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .menu-box-text-buttons{
+            width: 100%;
+            height: 30%;
+            color: red;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.329);
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+        }
+        .menu-box-buttons{
+            width: 100%;
+            height: 45%;
+            border-color: white;
+            border-radius: 5px;
+            border: 6px white solid;
+            background-color: rgba(255, 255, 255, 0.664);
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+        }
+        .menu-buttons{
+            width: 90px;
+            height: 28px;
+            border: none;
+            border-radius: 5px;
+            background-color: black;
+        }
+        .menu-box{
+            width: 100%;
+            height: 25%;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.329);
+        }
+        .menu-box-top{
+            width: 100%;
+            height: 30%;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.329);
+        }
+        .direção{
+            height: 100%;
+            /*border-color: white;
+            border-radius: 5px;
+            border-style: solid;*/
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+        .direção-box-button{
+            width: 100px;
+            height: 100px;
+            padding: 3px;
+            border-radius: 5px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .direção-button{
+            width: 90%;
+            height: 90%;
+            font-family: 'Press Start 2P', cursive;
+            border-radius: 100px;
+            background-color: red;
+            border-style: none;
+        }
+        </style>
+</head>
+
+<body>
+    <div class="controle">
+        <div class="painel">
+            <div class="motor">
+                <div class="fantasma"></div>
+                <div class= "motor-box-button">
+                    <button id="Frente" class="triangular-button" 
+                    ontouchstart="AcelerarF(event)" 
+                    ontouchend="Desacelerar(event)"
+                    ></button>
+                    <button id="Traz" class="triangular-button" 
+                    ontouchstart="AcelerarT(event)" 
+                    ontouchend="Desacelerar(event)"
+                    ></button>
+                </div>
+            </div>
+            <div class="menu">
+                <div class="menu-top">
+                    <div class="menu-box-top"></div>
+                    <div class="menu-box"><input class="menu-input" type="url" name="IP" id="IP"></div>
+                    <div class="menu-box-text-buttons">
+                        <div class="menu-text-button">Select</div>
+                        <div class="menu-text-button">Start</div>
+                    </div>
+                </div>
+                <div class="menu-bot">
+                    <div class="menu-box-buttons">
+                        <button class="menu-buttons"></button>
+                        <button class="menu-buttons"></button>
+                    </div>
+                    <div class="menu-box-top"></div>
+                </div>
+            </div>
+            <div class="direção">
+                <div class="direção-box-button">
+                    <button id="Esquerda" class="direção-button" 
+                    ontouchstart="EPresionada(event)" 
+                    ontouchend="ELiberada(event)"
+                    >E</button>
+                </div>
+                <div class="direção-box-button">
+                    <button id="Direita" class="direção-button" 
+                    ontouchstart="DPresionada(event)" 
+                    ontouchend="DLiberada(event)"
+                    >D</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var motor = "HIGH" // frente traz
+        var direção = "centro" // direita esquerda
+        function motorESP8266() {
+            let IP = document.getElementById("IP")
+            const url = "http://" + IP.value + "/motor";
+            console.log(url);
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `motor=${motor}`,
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        console.log("Valor enviado com sucesso para o ESP8266");
+                    } else {
+                        console.error("Erro ao enviar valor para o ESP8266");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erro na comunicação com o ESP8266", error);
+                });
+        }
+        function direçãoESP8266() {
+            let IP = document.getElementById("IP")
+            const url = "http://" + IP.value + "/direcao";
+            console.log(url);
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `direcao=${direção}`,
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        console.log("Valor enviado com sucesso para o ESP8266");
+                    } else {
+                        console.error("Erro ao enviar valor para o ESP8266");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Erro na comunicação com o ESP8266", error);
+                });
+        }
+        function AcelerarF() {
+            console.log('A função foi chamada Para Frente')
+            motor = "F"
+            motorESP8266()
+        }
+        function AcelerarT() {
+            console.log('A função foi chamada Para Traz')
+            motor = "T"
+            motorESP8266()
+        }
+        function Desacelerar() {
+            motor = "LOW"
+            motorESP8266()
+        }
+
+        function EPresionada(event) {
+            console.log('A função foi chamada EPresionada')
+            direção = 'e';
+            direçãoESP8266()
+        }
+        function ELiberada(event) {
+            console.log('A função foi chamada ELiberada')
+            direção = 'c';
+            direçãoESP8266()
+        }
+        function DPresionada(event) {
+            console.log('A função foi chamada DPresionada')
+            direção = 'd';
+            direçãoESP8266()
+        }
+        function DLiberada(event) {
+            console.log('A função foi chamada DLiberada')
+            direção = 'c';
+            direçãoESP8266()
+        }
+    </script>
+</body>
+
+</html>
